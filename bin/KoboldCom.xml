@@ -1,0 +1,509 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>KoboldCom</name>
+    </assembly>
+    <members>
+        <member name="T:KoboldCom.ProtocolAnalyzer`1">
+            <summary>
+            数据解析抽象类
+            </summary>
+            <typeparam name="T">解析结果类</typeparam>
+        </member>
+        <member name="T:KoboldCom.ProtocolAnalyzer`1.DataAnalyzedHandler">
+            <summary>
+            分析出新数据对象时触发的委托函数
+            </summary>
+            <param name="m"></param>
+        </member>
+        <member name="E:KoboldCom.ProtocolAnalyzer`1.OnDataAnalyzed">
+            <summary>
+            分析出新数据对象时触发的事件
+            </summary>
+        </member>
+        <member name="M:KoboldCom.ProtocolAnalyzer`1.Analyze">
+            <summary>
+            协议分析方法,可以在里面处理数据模型转换等
+            </summary>
+        </member>
+        <member name="M:KoboldCom.ProtocolAnalyzer`1.SearchBuffer(System.Collections.Generic.List{System.Byte})">
+            <summary>
+            数据解包方法，用来处理数据字节流到协议的匹配转换
+            </summary>
+            <param name="buffer">要分析的数据</param>
+            <returns>分析结果</returns>
+        </member>
+        <member name="M:KoboldCom.ProtocolAnalyzer`1.#ctor">
+            <summary>
+            constructor
+            </summary>
+        </member>
+        <member name="M:KoboldCom.ProtocolAnalyzer`1.op_Implicit(KoboldCom.ProtocolAnalyzer{`0})~`0">
+            <summary>
+            隐式类型转换
+            </summary>
+            <param name="ar">数据解析类</param>
+        </member>
+        <member name="M:KoboldCom.ProtocolAnalyzer`1.ToString">
+            <summary>
+            字符串转换
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:KoboldCom.ProtocolAnalyzer`1.Data">
+            <summary>
+            处理后的数据内容
+            </summary>
+        </member>
+        <member name="P:KoboldCom.ProtocolAnalyzer`1.PassMiliSecond">
+            <summary>
+            计时
+            </summary>
+        </member>
+        <member name="P:KoboldCom.ProtocolAnalyzer`1.Raw">
+            <summary>
+            未经协议转换处理的原始数据
+            </summary>
+        </member>
+        <member name="P:KoboldCom.ProtocolAnalyzer`1.TimeOut">
+            <summary>
+            超时时间
+            </summary>
+        </member>
+        <member name="P:KoboldCom.ProtocolAnalyzer`1.Valid">
+            <summary>
+            验证数据
+            </summary>
+        </member>
+        <member name="T:KoboldCom.HexProtocolAnalyzer`1">
+            <summary>
+            通用二进制通讯协议解析类
+            [HEAD_MASK, DATALEN, DATA, CHECK]
+            </summary>
+        </member>
+        <member name="F:KoboldCom.HexProtocolAnalyzer`1.CheckData">
+            <summary>
+            数据校验，默认使用异或校验
+            </summary>
+        </member>
+        <member name="M:KoboldCom.HexProtocolAnalyzer`1.#ctor">
+            <summary>
+            构造函数 Protected
+            </summary>
+        </member>
+        <member name="M:KoboldCom.HexProtocolAnalyzer`1.SearchBuffer(System.Collections.Generic.List{System.Byte})">
+            <summary>
+            数据=>协议处理转换
+            </summary>
+            <param name="buffer">缓冲区数据</param>
+            <returns>匹配结果</returns>
+        </member>
+        <member name="M:KoboldCom.HexProtocolAnalyzer`1.XorCheck(System.Collections.Generic.List{System.Byte},System.Int32,System.Int32)">
+            <summary>
+            异或校验方法
+            </summary>
+        </member>
+        <member name="M:KoboldCom.HexProtocolAnalyzer`1.SumCheck(System.Collections.Generic.List{System.Byte},System.Int32,System.Int32)">
+            <summary>
+            和校验方法
+            </summary>
+            <param name="buf"></param>
+            <param name="index"></param>
+            <param name="len"></param>
+            <returns></returns>
+        </member>
+        <member name="P:KoboldCom.HexProtocolAnalyzer`1.StaticLength">
+            <summary>
+            定长数据长度-默认不含数据校验位
+            </summary>
+        </member>
+        <member name="P:KoboldCom.HexProtocolAnalyzer`1.LenLength">
+            <summary>
+            数据长度值是几个字节的数据
+            </summary>
+        </member>
+        <member name="P:KoboldCom.HexProtocolAnalyzer`1.Mask">
+            <summary>
+            数据头
+            </summary>
+        </member>
+        <member name="T:KoboldCom.CheckDataHandler">
+            <summary>
+            校验方法委托
+            </summary>
+            <param name="buff">要检验的数据</param>
+            <param name="i">起始位置</param>
+            <param name="length">数据长度</param>
+            <returns>校验方法计算结果</returns>
+        </member>
+        <member name="T:KoboldCom.DataReceivedHandler">
+            <summary>
+            数据接收委托
+            </summary>
+        </member>
+        <member name="T:KoboldCom.IAnalyzer">
+            <summary>
+            数据解析接口
+            </summary>
+        </member>
+        <member name="M:KoboldCom.IAnalyzer.Analyze">
+            <summary>
+            解析数据
+            </summary>
+        </member>
+        <member name="M:KoboldCom.IAnalyzer.SearchBuffer(System.Collections.Generic.List{System.Byte})">
+            <summary>
+            缓冲区数据查询匹配操作
+            </summary>
+            <param name="buffer">数据缓冲区</param>
+            <returns>匹配结果</returns>
+        </member>
+        <member name="P:KoboldCom.IAnalyzer.Raw">
+            <summary>
+            未经协议转换处理的原始字节流数据
+            </summary>
+        </member>
+        <member name="T:KoboldCom.IAnalyzerCollection">
+            <summary>
+            数据解析方法类集合
+            </summary>
+        </member>
+        <member name="T:KoboldCom.ICommunication">
+            <summary>
+            通讯端口类 接口
+            </summary>
+        </member>
+        <member name="E:KoboldCom.ICommunication.OnDataReceived">
+            <summary>
+            解析出数据包之后触发的事件
+            </summary>
+        </member>
+        <member name="M:KoboldCom.ICommunication.Close">
+            <summary>
+            通讯关闭
+            </summary>
+        </member>
+        <member name="M:KoboldCom.ICommunication.Open(KoboldCom.ICommunicationSetting)">
+            <summary>
+            通讯开启
+            </summary>
+            <param name="setting">配置信息</param>
+            <returns>执行结果</returns>
+        </member>
+        <member name="M:KoboldCom.ICommunication.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            读取端口数据放到指定数组中
+            </summary>
+            <param name="buffer">存放数据的数组</param>
+            <param name="offset">起始位置</param>
+            <param name="count">数据长度</param>
+        </member>
+        <member name="M:KoboldCom.ICommunication.ReadExisting">
+            <summary>
+            在编码基础上，读取串口中所有立即可用字节
+            </summary>
+        </member>
+        <member name="M:KoboldCom.ICommunication.ReadLine">
+            <summary>
+            一直读取到SerialPort.NewLine值
+            </summary>
+        </member>
+        <member name="M:KoboldCom.ICommunication.Write(System.String)">
+            <summary>
+            将指定字符串写入到串口
+            </summary>
+            <param name="text">要写入的内容</param>
+        </member>
+        <member name="M:KoboldCom.ICommunication.Write(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            把指定数据写入到串口
+            </summary>
+            <param name="buffer">要写入的数组</param>
+            <param name="offset">数组起始位置</param>
+            <param name="count">长度</param>
+        </member>
+        <member name="M:KoboldCom.ICommunication.WriteLine(System.String)">
+            <summary>
+            将指定字符串和SerialPort.NewLine写入到串口
+            </summary>
+            <param name="text">指定字符串</param>
+        </member>
+        <member name="P:KoboldCom.ICommunication.BytesToRead">
+            <summary>
+            获取缓冲区中数据的字节数
+            </summary>
+        </member>
+        <member name="P:KoboldCom.ICommunication.Encoding">
+            <summary>
+            获取或设置传输前后文本的编码方式
+            </summary>
+        </member>
+        <member name="P:KoboldCom.ICommunication.IsOpen">
+            <summary>
+            获取串口打开状态
+            </summary>
+        </member>
+        <member name="P:KoboldCom.ICommunication.NewLine">
+            <summary>
+            获取或设置NewLine标志内容
+            </summary>
+        </member>
+        <member name="P:KoboldCom.ICommunication.Setting">
+            <summary>
+            获取或设置配置信息
+            </summary>
+        </member>
+        <member name="T:KoboldCom.ICommunicationSetting">
+            <summary>
+            串口配置
+            </summary>
+        </member>
+        <member name="M:KoboldCom.ICommunicationSetting.AsBytes">
+            <summary>
+            消息内容转为一个字节数组格式返回
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:KoboldCom.SerialPort">
+            <summary>
+            具体通讯类
+            </summary>
+        </member>
+        <member name="E:KoboldCom.SerialPort.OnDataReceived">
+            <summary>
+            串口接收到符合协议的数据包触发的事件
+            </summary>
+        </member>
+        <member name="M:KoboldCom.SerialPort.Close">
+            <summary>
+            关闭串口
+            </summary>
+        </member>
+        <member name="M:KoboldCom.SerialPort.Open(KoboldCom.ICommunicationSetting)">
+            <summary>
+            打开串口
+            </summary>
+            <param name="setting">串口配置信息</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:KoboldCom.SerialPort.Open(KoboldCom.SerialPortSetting)">
+            <summary>
+            打开串口
+            </summary>
+            <param name="setting">串口配置信息</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:KoboldCom.SerialPort.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            从串口读取消息
+            </summary>
+            <param name="buffer">缓冲区</param>
+            <param name="offset">偏移量</param>
+            <param name="count">长度</param>
+        </member>
+        <member name="M:KoboldCom.SerialPort.ReadExisting">
+            <summary>
+            在编码基础上，读取串口中所有立即可用字节
+            </summary>
+        </member>
+        <member name="M:KoboldCom.SerialPort.ReadLine">
+            <summary>
+            一直读取到SerialPort.NewLine值
+            </summary>
+        </member>
+        <member name="M:KoboldCom.SerialPort.Write(System.String)">
+            <summary>
+            将指定字符串写入到串口
+            </summary>
+            <param name="text">要写入的内容</param>
+        </member>
+        <member name="M:KoboldCom.SerialPort.Write(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            把指定数据写入到串口
+            </summary>
+            <param name="buffer">要写入的数组</param>
+            <param name="offset">数组起始位置</param>
+            <param name="count">长度</param>
+        </member>
+        <member name="M:KoboldCom.SerialPort.WriteLine(System.String)">
+            <summary>
+            将指定字符串和SerialPort.NewLine写入到串口
+            </summary>
+            <param name="text">指定字符串</param>
+        </member>
+        <member name="P:KoboldCom.SerialPort.BytesToRead">
+            <summary>
+            获取缓冲区中数据的字节数
+            </summary>
+        </member>
+        <member name="P:KoboldCom.SerialPort.Encoding">
+            <summary>
+            获取或设置传输前后文本的编码方式
+            </summary>
+        </member>
+        <member name="P:KoboldCom.SerialPort.IsOpen">
+            <summary>
+            获取串口打开状态
+            </summary>
+        </member>
+        <member name="P:KoboldCom.SerialPort.NewLine">
+            <summary>
+            获取或设置NewLine标志内容
+            </summary>
+        </member>
+        <member name="P:KoboldCom.SerialPort.Setting">
+            <summary>
+            获取或设置配置信息
+            </summary>
+        </member>
+        <member name="T:KoboldCom.SerialPortSetting">
+            <summary>
+            串口设置
+            </summary>
+        </member>
+        <member name="M:KoboldCom.SerialPortSetting.#ctor">
+            <summary>
+            默认构造函数
+            </summary>
+        </member>
+        <member name="M:KoboldCom.SerialPortSetting.AsBytes">
+            <summary>
+            消息内容转为一个字节数组返回
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:KoboldCom.SerialPortSetting.ToString">
+            <summary>
+            转换为字符串
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="F:KoboldCom.SerialPortSetting.Baudrate">
+            <summary>
+            波特率
+            </summary>
+        </member>
+        <member name="F:KoboldCom.SerialPortSetting.Handshake">
+            <summary>
+            握手协议
+            </summary>
+        </member>
+        <member name="F:KoboldCom.SerialPortSetting.NewLine">
+            <summary>
+            新行标识
+            </summary>
+        </member>
+        <member name="F:KoboldCom.SerialPortSetting.Parity">
+            <summary>
+            奇偶校验位
+            </summary>
+        </member>
+        <member name="F:KoboldCom.SerialPortSetting.Port">
+            <summary>
+            串口号
+            </summary>
+        </member>
+        <member name="F:KoboldCom.SerialPortSetting.StopBits">
+            <summary>
+            停止位
+            </summary>
+        </member>
+        <member name="T:KoboldCom.TextProtocolAnalyzer`1">
+            <summary>
+            文本通讯协议
+            [BeginOfLine******EndOfLine]
+            </summary>
+            <typeparam name="T">数据解析结果类</typeparam>
+        </member>
+        <member name="M:KoboldCom.TextProtocolAnalyzer`1.#ctor">
+            <summary>
+            创建文本协议分析对象
+            </summary>
+        </member>
+        <member name="M:KoboldCom.TextProtocolAnalyzer`1.SearchBuffer(System.Collections.Generic.List{System.Byte})">
+            <summary>
+            数据包解析匹配方法规则
+            </summary>
+            <param name="buffer">要分析的数据</param>
+            <returns>分析结果</returns>
+        </member>
+        <member name="P:KoboldCom.TextProtocolAnalyzer`1.BeginOfLine">
+            <summary>
+            数据包开始标志
+            </summary>
+        </member>
+        <member name="P:KoboldCom.TextProtocolAnalyzer`1.Encoding">
+            <summary>
+            数据编码方式
+            </summary>
+        </member>
+        <member name="P:KoboldCom.TextProtocolAnalyzer`1.EndOfLine">
+            <summary>
+            数据包结束标志
+            </summary>
+        </member>
+        <member name="T:KoboldCom.Communicator">
+            <summary>
+            串口通讯具体实现类
+            </summary>
+        </member>
+        <member name="E:KoboldCom.Communicator.OnRawDataReceived">
+            <summary>
+            在串口接收到字节数据时候触发的事件
+            </summary>
+        </member>
+        <member name="T:KoboldCom.Communicator.RawDataReceivedHandler">
+            <summary>
+            在串口接收到字节数据时候触发的事件委托
+            </summary>
+            <param name="bytes"></param>
+        </member>
+        <member name="M:KoboldCom.Communicator.#ctor(KoboldCom.ICommunication,KoboldCom.IAnalyzerCollection)">
+            <summary>
+            实例化
+            </summary>
+            <param name="com">串口配置</param>
+            <param name="analyzers">消息解析方法集合</param>
+        </member>
+        <member name="P:KoboldCom.Communicator.Com">
+            <summary>
+            串口对象
+            </summary>
+        </member>
+        <member name="P:KoboldCom.Communicator.ReadBufferSize">
+            <summary>
+            设置或获取缓冲区大小
+            </summary>
+        </member>
+        <member name="P:KoboldCom.Communicator.Analyzers">
+            <summary>
+            消息解析方法集合
+            </summary>
+        </member>
+        <member name="T:KoboldCom.SearchResult">
+            <summary>
+            匹配结果类型
+            </summary>
+        </member>
+        <member name="F:KoboldCom.SearchResult.None">
+            <summary>
+            在缓冲区中没有符合协议的内容
+            </summary>
+        </member>
+        <member name="F:KoboldCom.SearchResult.Mask">
+            <summary>
+            在缓冲区中找到协议头
+            </summary>
+        </member>
+        <member name="F:KoboldCom.SearchResult.Data">
+            <summary>
+            在缓冲区中找到协议数据段
+            </summary>
+        </member>
+        <member name="F:KoboldCom.SearchResult.All">
+            <summary>
+            在缓冲区中找到协议完整数据包
+            </summary>
+        </member>
+    </members>
+</doc>
