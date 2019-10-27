@@ -1,3 +1,4 @@
+[中文](/README.CN.md)
 ### KoboldCom
 KoboldCom is serial port communication lib.
 
@@ -16,6 +17,7 @@ var communicator = new KoboldCom.Communicator(new KoboldCom.SerialPort(), new My
 
 ### TODO:
 - i18n
+- TextProtocolAnalyzer DataCheck Support
 
 ### Thanks
 [Article](http://blog.csdn.net/wuyazhe/article/details/5598945)
