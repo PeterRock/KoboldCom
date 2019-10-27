@@ -60,6 +60,9 @@ KoboldCom.Communicator对上层开放了两个事件
 - i18n
 - TextProtocolAnalyzer CheckData 数据校验支持
 
+### 串口模拟与调试
+[Windows](https://www.petershi.net/archives/2885)
+
 ### Thanks
 触发要做这个东西的灵感来自[文章](http://blog.csdn.net/wuyazhe/article/details/5598945)
 
