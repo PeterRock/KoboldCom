@@ -18,7 +18,7 @@
 
 其中$表示开始；GPGGA：命令字；*表示结尾;77校验
 
-这两种协议很常见，所以SCommunicator默认提供了这两种常用的协议解析类（`HexProtocolAnalyzer`类和`TextProtocolAnalyzer`类）。
+这两种协议很常见，所以KoboldCom默认提供了这两种常用的协议解析类（`HexProtocolAnalyzer`类和`TextProtocolAnalyzer`类）。
 
 ### Demo
 ![运行截图](/docs/Screen01.png)
