@@ -15,8 +15,10 @@ namespace TextProtocolAnalyzerCheckData
             ValidNmeaChecksumIsAccepted();
             ReadmeNmeaExampleIsAccepted();
             InvalidNmeaChecksumIsRejected();
+            MalformedHexChecksumIsRejected();
             InvalidThenValidFrameFindsValid();
             IncompleteChecksumWaits();
+            BadFrameThenIncompleteWaits();
             BinaryChecksumAfterEndOfLine();
             EndOfLineBeforeBeginIsIgnored();
 
@@ -66,7 +68,17 @@ namespace TextProtocolAnalyzerCheckData
             SearchResult result = p.SearchBuffer(buffer);
             Expect("nmea invalid result", SearchResult.None, result);
             Expect("nmea invalid raw", 0, p.Raw.Length);
-            Expect("nmea invalid buffer kept", 11, buffer.Count);
+            Expect("nmea invalid buffer discarded", 0, buffer.Count);
+        }
+
+        private static void MalformedHexChecksumIsRejected()
+        {
+            NmeaLikeProtocol p = new NmeaLikeProtocol();
+            List<byte> buffer = Bytes("$GPGGA,1*GG");
+            SearchResult result = p.SearchBuffer(buffer);
+            Expect("nmea badhex result", SearchResult.None, result);
+            Expect("nmea badhex raw", 0, p.Raw.Length);
+            Expect("nmea badhex discarded", 0, buffer.Count);
         }
 
         private static void InvalidThenValidFrameFindsValid()
@@ -76,6 +88,7 @@ namespace TextProtocolAnalyzerCheckData
             SearchResult result = p.SearchBuffer(buffer);
             Expect("skip-bad result", SearchResult.All, result);
             Expect("skip-bad raw", "$GPGGA,1*4B", Encoding.ASCII.GetString(p.Raw));
+            Expect("skip-bad leftover", 0, buffer.Count);
         }
 
         private static void IncompleteChecksumWaits()
@@ -86,6 +99,16 @@ namespace TextProtocolAnalyzerCheckData
             Expect("incomplete result", SearchResult.Mask, result);
             Expect("incomplete raw", 0, p.Raw.Length);
             Expect("incomplete buffer kept", 10, buffer.Count);
+        }
+
+        private static void BadFrameThenIncompleteWaits()
+        {
+            NmeaLikeProtocol p = new NmeaLikeProtocol();
+            List<byte> buffer = Bytes("$GPGGA,1*00$GPGGA,1*4");
+            SearchResult result = p.SearchBuffer(buffer);
+            Expect("bad-then-partial result", SearchResult.Mask, result);
+            Expect("bad-then-partial raw", 0, p.Raw.Length);
+            Expect("bad-then-partial leftover", "$GPGGA,1*4", Encoding.ASCII.GetString(buffer.ToArray()));
         }
 
         private static void BinaryChecksumAfterEndOfLine()

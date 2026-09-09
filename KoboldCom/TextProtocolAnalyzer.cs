@@ -17,6 +17,7 @@ namespace KoboldCom
         /// 数据校验，默认不校验（保持无校验文本协议兼容）
         /// </summary>
         protected CheckDataHandler CheckData;
+        private int _checkLength;
 
         /// <summary>
         /// 创建文本协议分析对象
@@ -37,6 +38,7 @@ namespace KoboldCom
         {
             string str = this.Encoding.GetString(buffer.ToArray());
             int searchFrom = 0;
+            int discardThrough = 0;
             bool hasCheck = (this.CheckData != null) && (this.CheckLength > 0);
 
             while (searchFrom < str.Length)
@@ -44,6 +46,7 @@ namespace KoboldCom
                 int bgnIndex = str.IndexOf(this.BeginOfLine, searchFrom, StringComparison.Ordinal);
                 if (bgnIndex == -1)
                 {
+                    DiscardPrefix(buffer, discardThrough);
                     return SearchResult.None;
                 }
 
@@ -51,6 +54,7 @@ namespace KoboldCom
                 int endIndex = str.IndexOf(this.EndOfLine, payloadStart, StringComparison.Ordinal);
                 if (endIndex == -1)
                 {
+                    DiscardPrefix(buffer, discardThrough);
                     return SearchResult.Mask;
                 }
 
@@ -59,6 +63,7 @@ namespace KoboldCom
                 {
                     if (str.Length < (frameEnd + this.CheckLength))
                     {
+                        DiscardPrefix(buffer, discardThrough);
                         return SearchResult.Mask;
                     }
 
@@ -66,7 +71,8 @@ namespace KoboldCom
                     byte expected;
                     if (!this.TryGetCheckValue(buffer, str, frameEnd, out expected) || (computed != expected))
                     {
-                        // 校验失败则跳过本次开始标志，继续向后搜寻，不把该帧当作有效数据包
+                        // 校验失败：不作为有效数据包；跳过本次开始标志继续搜寻，并记录可丢弃的完整坏帧
+                        discardThrough = frameEnd + this.CheckLength;
                         searchFrom = bgnIndex + ((this.BeginOfLine.Length > 0) ? this.BeginOfLine.Length : 1);
                         continue;
                     }
@@ -75,11 +81,20 @@ namespace KoboldCom
 
                 base.Raw = new byte[frameEnd - bgnIndex];
                 buffer.CopyTo(bgnIndex, base.Raw, 0, base.Raw.Length);//将Buffer中的数据拷贝到Raw中
-                buffer.RemoveRange(bgnIndex, base.Raw.Length);//把拷贝好的数据从缓冲区中移除
+                buffer.RemoveRange(0, frameEnd);//清除坏帧前缀和本帧，与 Hex 协议在匹配成功后从 0 移除一致
                 return SearchResult.All;
             }
 
+            DiscardPrefix(buffer, discardThrough);
             return SearchResult.None;
+        }
+
+        private static void DiscardPrefix(List<byte> buffer, int count)
+        {
+            if ((count > 0) && (count <= buffer.Count))
+            {
+                buffer.RemoveRange(0, count);
+            }
         }
 
         /// <summary>
@@ -164,7 +179,29 @@ namespace KoboldCom
         /// <summary>
         /// 结束标志后的校验数据长度。默认 2（NMEA 两位十六进制）。
         /// 仅在 CheckData 不为空时生效。1 表示单字节二进制校验，2 表示两位十六进制 ASCII。
+        /// 其他正数按 2 处理；小于等于 0 表示不读取校验段。
         /// </summary>
-        public int CheckLength { get; set; }
+        public int CheckLength
+        {
+            get
+            {
+                return this._checkLength;
+            }
+            set
+            {
+                if (value == 1)
+                {
+                    this._checkLength = 1;
+                }
+                else if (value <= 0)
+                {
+                    this._checkLength = 0;
+                }
+                else
+                {
+                    this._checkLength = 2;
+                }
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@
 
 这两种协议很常见，所以KoboldCom默认提供了这两种常用的协议解析类（`HexProtocolAnalyzer`类和`TextProtocolAnalyzer`类）。
 
-文本协议可按与十六进制协议相同的方式可选启用 `CheckData`。NMEA 风格（`$` 开始、`*` 结束、两位十六进制 XOR）示例：
+文本协议可按与十六进制协议相同的方式可选启用 `CheckData`。在子类构造函数中配置，NMEA 风格（`$` 开始、`*` 结束、两位十六进制 XOR）示例：
 
 ```
 BeginOfLine = "$";
@@ -28,7 +28,8 @@ EndOfLine = "*";
 CheckData = XorCheck; // 默认读取 * 后 2 位十六进制，与 $ 和 * 之间字符的异或比较
 ```
 
-不设置 `CheckData` 时行为与原来一致（例如 Demo 的 `^&...$$`，不做校验）。校验失败的帧会被跳过，不会当作有效数据包。
+不设置 `CheckData` 时不做校验（例如 Demo 的 `^&...$$`）。`EndOfLine` 从 `BeginOfLine` 之后查找，避免缓冲区里靠前的结束符被误用。
+校验失败的完整帧不会当作有效数据包，并从缓冲区丢弃；若其后还有合法帧，会继续匹配。
 `CheckLength` 默认为 2（十六进制 ASCII）；设为 1 时按 `EndOfLine` 后的单字节二进制校验比较。
 
 无硬件校验可运行：`dotnet run --project verify/TextProtocolAnalyzerCheckData`
