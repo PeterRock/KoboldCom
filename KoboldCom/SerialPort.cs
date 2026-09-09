@@ -183,15 +183,16 @@ namespace KoboldCom
         }
 
         /// <summary>
-        /// 获取或设置配置信息
+        /// 获取或设置配置信息。
+        /// Handshake 为 None 时读写 RtsEnable/DtrEnable；其他握手模式这两项不生效，读取为 false。
         /// </summary>
         public ICommunicationSetting Setting
         {
             get
             {
                 Handshake handshake = this._serialPort.Handshake;
-                bool rtsEnable = true;
-                bool dtrEnable = true;
+                bool rtsEnable = false;
+                bool dtrEnable = false;
                 if (handshake == Handshake.None)
                 {
                     rtsEnable = this._serialPort.RtsEnable;

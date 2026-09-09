@@ -14,6 +14,13 @@ HexProtocolAnalyzer still defaults to a **1-byte** trailing checksum (`XorCheck`
 
 When `Handshake` is `None`, `SerialPortSetting` defaults `RtsEnable` and `DtrEnable` to `true` and applies them on `Open` / `Setting`. Hardware that uses a real handshake mode is unchanged.
 
+No hardware required:
+
+```
+dotnet run --project verify/HexProtocolAnalyzerCheckLength
+dotnet run --project verify/SerialPortHandshakeNone
+```
+
 
 ### Code Demo
 See `/Demo` does

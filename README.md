@@ -48,6 +48,7 @@ CheckData16 = Crc16Modbus; // 或 SumCheck16；返回 16 位主机数值
 ```
 dotnet run --project verify/TextProtocolAnalyzerCheckData
 dotnet run --project verify/HexProtocolAnalyzerCheckLength
+dotnet run --project verify/SerialPortHandshakeNone
 ```
 
 ### 串口 RTS / DTR

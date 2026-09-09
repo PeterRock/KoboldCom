@@ -11,10 +11,12 @@ namespace SerialPortHandshakeNone
 
         private static int Main()
         {
+            // Settings-only: does not Open a real COM port. ApplyControlLines is the same helper used after Open.
             SettingDefaultsEnableRtsDtr();
             HandshakeNoneAppliesRtsDtr();
             HandshakeNoneHonorsDisabledFlags();
             RequestToSendDoesNotThrow();
+            RequestToSendReportsControlLinesInactive();
 
             if (_failures > 0)
             {
@@ -84,6 +86,21 @@ namespace SerialPortHandshakeNone
                 _failures++;
                 Console.WriteLine("FAIL request-to-send throw: {0}", ex.GetType().Name);
             }
+        }
+
+        private static void RequestToSendReportsControlLinesInactive()
+        {
+            SerialPort port = new SerialPort();
+            port.Setting = new SerialPortSetting
+            {
+                Port = 1,
+                Handshake = Handshake.RequestToSend,
+                RtsEnable = true,
+                DtrEnable = true
+            };
+            SerialPortSetting applied = (SerialPortSetting)port.Setting;
+            Expect("rts mode RtsEnable inactive", false, applied.RtsEnable);
+            Expect("rts mode DtrEnable inactive", false, applied.DtrEnable);
         }
 
         private static void Expect<T>(string name, T expected, T actual)

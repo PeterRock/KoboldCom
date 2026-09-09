@@ -21,6 +21,9 @@ namespace HexProtocolAnalyzerCheckLength
             Crc16ModbusLittleEndianIsAccepted();
             StaticLengthTwoByteFrameIsAccepted();
             CheckLengthDefaultsToOne();
+            OneByteIncompleteWaits();
+            TwoByteFallsBackToSingleByteCheckData();
+            CheckLengthZeroOmitsChecksumBytes();
 
             if (_failures > 0)
             {
@@ -144,6 +147,37 @@ namespace HexProtocolAnalyzerCheckLength
             Expect("default CheckLength", 1, p.PublicCheckLength);
         }
 
+        private static void OneByteIncompleteWaits()
+        {
+            DefaultXorProtocol p = new DefaultXorProtocol();
+            List<byte> buffer = Bytes(0xAA, 0x02, 0x01, 0x02);
+            SearchResult result = p.SearchBuffer(buffer);
+            Expect("xor1 incomplete result", SearchResult.Mask, result);
+            Expect("xor1 incomplete raw", 0, p.Raw.Length);
+            Expect("xor1 incomplete kept", 4, buffer.Count);
+        }
+
+        private static void TwoByteFallsBackToSingleByteCheckData()
+        {
+            ByteCheckAs16Protocol p = new ByteCheckAs16Protocol();
+            // xor(01,02)=03 compared as 16-bit LE => 03 00
+            List<byte> buffer = Bytes(0xAA, 0x02, 0x01, 0x02, 0x03, 0x00);
+            SearchResult result = p.SearchBuffer(buffer);
+            Expect("byte16 result", SearchResult.All, result);
+            Expect("byte16 raw", "AA0201020300", Hex(p.Raw));
+        }
+
+        private static void CheckLengthZeroOmitsChecksumBytes()
+        {
+            NoChecksumProtocol p = new NoChecksumProtocol();
+            List<byte> buffer = Bytes(0xAA, 0x02, 0x01, 0x02, 0x99);
+            SearchResult result = p.SearchBuffer(buffer);
+            Expect("nocheck result", SearchResult.All, result);
+            Expect("nocheck raw", "AA020102", Hex(p.Raw));
+            Expect("nocheck leftover", 1, buffer.Count);
+            Expect("nocheck leftover byte", 0x99, buffer[0]);
+        }
+
         private static List<byte> Bytes(params byte[] values)
         {
             return new List<byte>(values);
@@ -251,6 +285,34 @@ namespace HexProtocolAnalyzerCheckLength
                 StaticLength = 3;
                 CheckLength = 2;
                 CheckData16 = SumCheck16;
+            }
+
+            public override void Analyze()
+            {
+            }
+        }
+
+        private sealed class ByteCheckAs16Protocol : HexProtocolAnalyzer<int>
+        {
+            public ByteCheckAs16Protocol()
+            {
+                Mask = new byte[] { 0xAA };
+                CheckLength = 2;
+                CheckData = XorCheck;
+            }
+
+            public override void Analyze()
+            {
+            }
+        }
+
+        private sealed class NoChecksumProtocol : HexProtocolAnalyzer<int>
+        {
+            public NoChecksumProtocol()
+            {
+                Mask = new byte[] { 0xAA };
+                CheckLength = 0;
+                CheckData = null;
             }
 
             public override void Analyze()
