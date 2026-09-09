@@ -13,8 +13,8 @@ namespace Demo
         {
             this.Mask = new byte[] { 0xAA, 0xBB, 0xCC };
             this.TimeOut = 5;//超过5秒，收不到数据，则此数据无效。
-            //自定义校验方法，演示为逐个相加和随便一个数字取模，我选择的是42
-            this.CheckData = SumCheck; // 使用BinaryProtocolAnalyzer提供的和校验方法
+            // 默认 CheckLength = 1（单字节校验）。双字节时设置 CheckLength = 2 并指定 CheckData16。
+            this.CheckData = SumCheck; // 使用 HexProtocolAnalyzer 提供的和校验方法
         }
         /// <summary>
         /// 数据解析协议

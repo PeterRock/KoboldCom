@@ -51,6 +51,7 @@ namespace KoboldCom
             try
             {
                 this._serialPort.Open();
+                ApplyControlLines(this._serialPort, setting);
                 this._serialPort.DataReceived += new SerialDataReceivedEventHandler(this.SerialPortDataReceived);
             }
             catch
@@ -188,14 +189,24 @@ namespace KoboldCom
         {
             get
             {
+                Handshake handshake = this._serialPort.Handshake;
+                bool rtsEnable = true;
+                bool dtrEnable = true;
+                if (handshake == Handshake.None)
+                {
+                    rtsEnable = this._serialPort.RtsEnable;
+                    dtrEnable = this._serialPort.DtrEnable;
+                }
                 return new SerialPortSetting
                 {
                     StopBits = this._serialPort.StopBits,
                     Baudrate = this._serialPort.BaudRate,
-                    Handshake = this._serialPort.Handshake,
+                    Handshake = handshake,
                     NewLine = this._serialPort.NewLine,
                     Parity = this._serialPort.Parity,
-                    Port = int.Parse(Regex.Match(this._serialPort.PortName, @"\d+").Value)
+                    Port = int.Parse(Regex.Match(this._serialPort.PortName, @"\d+").Value),
+                    RtsEnable = rtsEnable,
+                    DtrEnable = dtrEnable
                 };
             }
             set
@@ -212,7 +223,22 @@ namespace KoboldCom
                 this._serialPort.Handshake = setting.Handshake;
                 this._serialPort.BaudRate = setting.Baudrate;
                 this._serialPort.StopBits = setting.StopBits;
+                ApplyControlLines(this._serialPort, setting);
             }
+        }
+
+        /// <summary>
+        /// Handshake.None 时写入 RTS/DTR。部分 USB 转串口只在 Open 之后才真正拉线。
+        /// Handshake 不为 None 时不可设置这两项（会抛 InvalidOperationException）。
+        /// </summary>
+        private static void ApplyControlLines(System.IO.Ports.SerialPort port, SerialPortSetting setting)
+        {
+            if ((setting == null) || (setting.Handshake != Handshake.None))
+            {
+                return;
+            }
+            port.RtsEnable = setting.RtsEnable;
+            port.DtrEnable = setting.DtrEnable;
         }
     }
 }
