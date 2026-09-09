@@ -1,44 +1,44 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28922.388
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo", "Demo\Demo.csproj", "{2C36DE91-95E5-48FF-B986-E19C165C520E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KoboldCom", "KoboldCom\KoboldCom.csproj", "{5D3AF405-53B3-449B-8F18-810FF167E8F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoboldCom", "KoboldCom\KoboldCom.csproj", "{5D3AF405-53B3-449B-8F18-810FF167E8F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demo", "Demo\Demo.csproj", "{2C36DE91-95E5-48FF-B986-E19C165C520E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextProtocolAnalyzerCheckData", "verify\TextProtocolAnalyzerCheckData\TextProtocolAnalyzerCheckData.csproj", "{C8F2A1E4-7B3D-4E9A-9F21-6D8C4B1A0E55}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HexProtocolAnalyzerCheckLength", "verify\HexProtocolAnalyzerCheckLength\HexProtocolAnalyzerCheckLength.csproj", "{D4E7B2A1-9C38-4F6E-8A12-3B7C5D0E9F21}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SerialPortHandshakeNone", "verify\SerialPortHandshakeNone\SerialPortHandshakeNone.csproj", "{E5F8C3B2-0D49-5A7F-9B23-4C8D6E1F0A32}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Debug|Mixed Platforms = Debug|Mixed Platforms
-		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
-		Release|Mixed Platforms = Release|Mixed Platforms
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Debug|x86.ActiveCfg = Debug|x86
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Debug|x86.Build.0 = Debug|x86
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Release|Any CPU.ActiveCfg = Release|x86
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Release|Mixed Platforms.Build.0 = Release|x86
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Release|x86.ActiveCfg = Release|x86
-		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Release|x86.Build.0 = Release|x86
 		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Debug|x86.Build.0 = Debug|Any CPU
 		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Release|x86.ActiveCfg = Release|Any CPU
-		{5D3AF405-53B3-449B-8F18-810FF167E8F2}.Release|x86.Build.0 = Release|Any CPU
+		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C36DE91-95E5-48FF-B986-E19C165C520E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8F2A1E4-7B3D-4E9A-9F21-6D8C4B1A0E55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8F2A1E4-7B3D-4E9A-9F21-6D8C4B1A0E55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8F2A1E4-7B3D-4E9A-9F21-6D8C4B1A0E55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8F2A1E4-7B3D-4E9A-9F21-6D8C4B1A0E55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4E7B2A1-9C38-4F6E-8A12-3B7C5D0E9F21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4E7B2A1-9C38-4F6E-8A12-3B7C5D0E9F21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4E7B2A1-9C38-4F6E-8A12-3B7C5D0E9F21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4E7B2A1-9C38-4F6E-8A12-3B7C5D0E9F21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5F8C3B2-0D49-5A7F-9B23-4C8D6E1F0A32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5F8C3B2-0D49-5A7F-9B23-4C8D6E1F0A32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5F8C3B2-0D49-5A7F-9B23-4C8D6E1F0A32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5F8C3B2-0D49-5A7F-9B23-4C8D6E1F0A32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
