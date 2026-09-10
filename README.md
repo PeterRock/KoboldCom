@@ -1,126 +1,136 @@
-### KoboldCom
+[English](README.EN.md)
 
-`KoboldCom`是一个串口通信类库，提供自定义多协议异步解析、数据模型转换等功能。
+# KoboldCom
 
-这里的「异步」指 `SerialPort.DataReceived` 事件驱动的收包与解析流水线，不是 C# 的 `async`/`await`。
+KoboldCom 是一个 C# 串口通信类库。它打开串口、读写字节、按协议切分数据帧，并把完整帧映射到数据模型。一个端口可以同时使用多个协议。
 
-封装最复杂的数据流异步收发，以及根据协议把接收的数据进行模型映射转换等功能。
+文档里的「异步」指 `SerialPort.DataReceived` 事件驱动的接收和解析。它不是 C# 的 `async` / `await`。
 
-类库提供了常见的16进制字节流协议`(HexProtocolAnalyzer)`和文本字节串协议`(TextProtocolAnalyzer)`的解析，所以可以使用KoboldCom，快速实现指定协议的数据收发
+## 要求
 
-### 版本说明
+当前版本需要 [.NET 8 SDK](https://dotnet.microsoft.com/download)。
 
-这是一次有意的主版本中断：
-
-| 版本线 | 目标框架 | 说明 |
+| 版本 | 目标框架 | 获取方式 |
 | --- | --- | --- |
-| **1.x** | .NET Framework 3.5 | 标签 **`v1.1.0`** 是规划 2.0 时的 Framework 快照（含 PR #4 CheckData）。其后合并的 PR #5（十六进制双字节校验 / Handshake.None RTS/DTR）仍在 Framework 上，见分支 **`netfx-1.x`**。仍在 Framework 上的项目请使用该标签或分支，不要升级到 2.x。 |
-| **2.x**（当前主线） | `net8.0` + NuGet `System.IO.Ports` | SDK 风格工程，并包含 PR #4 / #5 的协议与串口行为。2.x 程序集无法被 .NET Framework 3.5 项目引用。程序集版本 **2.0.0**。 |
+| **1.x** | .NET Framework 3.5 | 标签 [`v1.1.0`](https://github.com/PeterRock/KoboldCom/releases/tag/v1.1.0)。之后的 Framework 提交在分支 [`netfx-1.x`](https://github.com/PeterRock/KoboldCom/tree/netfx-1.x)。不要把 Framework 项目升级到 2.x。 |
+| **2.x**（当前） | `net8.0` + NuGet `System.IO.Ports` | 当前 `master`。程序集版本 **2.0.0**。.NET Framework 3.5 项目不能引用 2.x。 |
 
-公开 C# API 与中文 XML 文档尽量保持不变。本现代化不改写协议逻辑。
+变更记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-### 构建
+## 组成
 
-需要 [.NET 8 SDK](https://dotnet.microsoft.com/download)。
+- `Communicator`：连接串口和解析器。读取字节，并分发给解析器。
+- `SerialPort`（实现 `ICommunication`）：打开、关闭、读写串口。
+- `ProtocolAnalyzer<T>`：把一帧映射到模型 `T`。内置 `HexProtocolAnalyzer` 和 `TextProtocolAnalyzer`。
+- `IAnalyzerCollection`：一组解析器。一个 `Communicator` 可以注册多个协议。
 
-```
-dotnet build KoboldCom.sln
-dotnet run --project verify/TextProtocolAnalyzerCheckData
-dotnet run --project verify/HexProtocolAnalyzerCheckLength
-dotnet run --project verify/SerialPortHandshakeNone
-```
+处理顺序：
 
-Demo 为 `net8.0-windows` WinForms 项目，请在 Windows 上运行。非 Windows 环境可以交叉编译（工程已开启 `EnableWindowsTargeting`），但不能运行该界面程序。
+1. `SerialPort.DataReceived` 触发。
+2. `Communicator` 读取字节，并引发 `OnRawDataReceived`。
+3. 集合中的每个解析器调用 `SearchBuffer`。
+4. 找到完整帧后调用 `Analyze()`。
 
-### Wiki How
+## 用法
 
-常见的通讯协议一般是这样的：头+数据长度+数据正文+校验
+创建 `IAnalyzerCollection`（见 `Demo/MyProtocols.cs`）。把它和 `SerialPort` 交给 `Communicator`。订阅事件。打开端口。
 
-    AA 44 05 01 02 03 04 05 EA
+```csharp
+var protocols = new MyProtocols();
+var communicator = new Communicator(new KoboldCom.SerialPort(), protocols);
 
-还有一种长这个样子：
+communicator.OnRawDataReceived += bytes => { /* 原始字节 */ };
+protocols.ProtocolText.OnDataAnalyzed += m => { /* 文本模型 */ };
+protocols.ProtocolBinary.OnDataAnalyzed += m => { /* 十六进制模型 */ };
 
-    $GPGGA,121252.000,3937.3032,N,11611.6046,E,1,05,2.0,45.9,M,-5.7,M,,0000*75
-
-其中$表示开始；GPGGA：命令字；*表示结尾;75校验（`$` 与 `*` 之间字符的异或）
-
-这两种协议很常见，所以KoboldCom默认提供了这两种常用的协议解析类（`HexProtocolAnalyzer`类和`TextProtocolAnalyzer`类）。
-
-文本协议可按与十六进制协议相同的方式可选启用 `CheckData`。在子类构造函数中配置，NMEA 风格（`$` 开始、`*` 结束、两位十六进制 XOR）示例：
-
-```
-BeginOfLine = "$";
-EndOfLine = "*";
-CheckData = XorCheck; // 默认读取 * 后 2 位十六进制，与 $ 和 * 之间字符的异或比较
+communicator.Com.Open(new SerialPortSetting { Port = 2, Baudrate = 9600 });
 ```
 
-不设置 `CheckData` 时不做校验（例如 Demo 的 `^&...$$`）。`EndOfLine` 从 `BeginOfLine` 之后查找，避免缓冲区里靠前的结束符被误用。
-校验失败的完整帧不会当作有效数据包，并从缓冲区丢弃；若其后还有合法帧，会继续匹配。
-`CheckLength` 默认为 2（十六进制 ASCII）；设为 1 时按 `EndOfLine` 后的单字节二进制校验比较。
+在协议子类的构造函数中设置帧格式。在 `Analyze()` 中把 `Raw` 赋给 `Data`，然后设置 `Valid = true`。
 
-十六进制协议默认仍是帧尾 **1 字节**校验（`XorCheck`），现有协议无需改动。双字节校验时在子类构造函数中设置：
+| 事件 | 类型 | 时机 |
+| --- | --- | --- |
+| `OnRawDataReceived` | `Communicator` | 读到一批原始字节。 |
+| `OnDataAnalyzed` | `ProtocolAnalyzer<T>` | 子类将 `Valid` 设为 `true`。超时后 `Valid` 被设回 `false`，该事件也会触发。 |
 
-```
-CheckLength = 2;
-CheckData16 = Crc16Modbus; // 或 SumCheck16；返回 16 位主机数值
-// 默认按小端（低字节在前）与帧尾两字节比较，与 Modbus CRC-16 一致
-// 高字节在前时：CheckBigEndian = true;
-```
+`ICommunication.OnDataReceived` 表示端口上有可读数据。`Communicator` 已经订阅该事件。
 
-未设置 `CheckData16` 时，会把原来的单字节 `CheckData` 结果当作 16 位值比较。
+串口名格式为 `COM` 加端口号（`SerialPortSetting.Port`）。`Handshake` 为 `None` 时，`RtsEnable` 和 `DtrEnable` 默认为 `true`，在应用 `Setting` 和 `Open` 之后写入。
 
-### 串口 RTS / DTR
+### 文本协议
 
-`Handshake.None` 时，系统不会自动驱动 RTS/DTR。`SerialPortSetting` 默认 `RtsEnable = true`、`DtrEnable = true`，在 `Open` / 应用 `Setting` 时写入端口，避免部分设备只能被动收数、`Write` 后无应答。需要关闭时把对应标志设为 `false`。`Handshake` 不为 `None` 时仍由系统握手逻辑控制，不会改写这两根线。
+`TextProtocolAnalyzer` 的帧格式是 `[BeginOfLine][数据][EndOfLine]`。在 `BeginOfLine` 之后查找 `EndOfLine`。
 
-### Demo
-![运行截图](/docs/Screen01.png)
+```csharp
+public class DemoText : TextProtocolAnalyzer<int>
+{
+    public DemoText()
+    {
+        BeginOfLine = "^&";
+        EndOfLine = "$$";
+    }
 
-### Code Demo
-可直接参考`/Demo`中的例子，包含完整的多协议处理
-
-#### Usage 
-```
-// 创建通讯协议和模型转换方法
-// Protocol1.cs
-...Analyze(){
-    // 处理数据模型转换
+    public override void Analyze() { /* 从 Raw 解析数据；Valid = true; */ }
 }
-
-
-// 创建通讯器
-var communicator = new KoboldCom.Communicator(new KoboldCom.SerialPort(), new MyProtocols());
-// 通讯器处理接收原始数据
-communicator.OnRawDataReceived += Communicator_OnRawDataReceived;
-// 自定义模型转换后续操作
-Protocol1.OnDataAnalyzed += ProtocolText_OnDataAnalyzed;
 ```
 
-### Events
+可选校验：设置 `CheckData` 后，帧末尾还有校验字段。`CheckLength` 默认值为 2（`EndOfLine` 后的两位十六进制 ASCII）。NMEA 示例：`BeginOfLine = "$"`，`EndOfLine = "*"`，`CheckData = XorCheck`。校验失败的完整帧会从缓冲区删除。
 
-KoboldCom.Communicator对上层开放了两个事件
+### 十六进制协议
 
-1. OnDataAnalyzed
-从串口接收的数据中解析到符合协议要求的数据包，会触发的事件
+`HexProtocolAnalyzer` 的帧格式是 `[Mask][长度][数据][校验]`。定长帧使用 `StaticLength`。
 
-2. OnDataReceived
-串口收到新数据，会触发该事件
+```
+AA 44 05 01 02 03 04 05 EA
+```
 
-可以给这两个事件分别绑定处理方法就可以进行对应操作。
+```csharp
+public class DemoHex : HexProtocolAnalyzer<DemoDataModel>
+{
+    public DemoHex()
+    {
+        Mask = new byte[] { 0xAA, 0xBB, 0xCC };
+        CheckData = SumCheck;
+    }
 
-### More
-如果这两种协议的解析方式不适合你的项目要求，可以继承抽象`ProtocolAnalyzer`类编写子类，一般只需要复写`SearchBuffer`方法,，也就是数据到协议的处理逻辑就可以了，其他的不需要改动。
+    public override void Analyze() { /* Raw → Data; Valid = true; */ }
+}
+```
 
+可选校验：`CheckLength` 默认值为 1，`CheckData` 默认值为 `XorCheck`。双字节校验时设置 `CheckLength = 2` 和 `CheckData16`（`Crc16Modbus` 或 `SumCheck16`）。比较默认小端。大端时设置 `CheckBigEndian = true`。
 
-### TODO:
-- i18n
+## 自定义协议
 
-### 串口模拟与调试
-[Windows](https://www.petershi.net/archives/2885)
+若内置解析器不适用，继承 `ProtocolAnalyzer<T>`。
 
-### Thanks
-触发要做这个东西的灵感来自[文章](http://blog.csdn.net/wuyazhe/article/details/5598945)
+- 重写 `SearchBuffer`：从 `List<byte>` 取出一帧写入 `Raw`，并删除已处理的字节。
+- 重写 `Analyze()`：把 `Raw` 映射到模型。
 
+`HexProtocolAnalyzer` 和 `TextProtocolAnalyzer` 已经实现 `SearchBuffer`。这种情况下只需配置帧格式并重写 `Analyze()`。
 
-### License
-MIT
+## Demo
+
+![运行截图](docs/Screen01.png)
+
+Demo 是 `net8.0-windows` WinForms 程序。它同时解析文本协议 `^&…$$` 和十六进制协议 `AA BB CC …`，并在列表中显示 `OnDataAnalyzed` 的结果。源码在 [`Demo/`](Demo/)。只能在 Windows 上运行：
+
+```bash
+dotnet run --project Demo
+```
+
+其他系统可以交叉编译 Demo（已设置 `EnableWindowsTargeting`），但不能运行该界面。
+
+## 构建
+
+```bash
+dotnet build KoboldCom.sln
+```
+
+无硬件检查：`dotnet run --project verify/TextProtocolAnalyzerCheckData`、`verify/HexProtocolAnalyzerCheckLength`、`verify/SerialPortHandshakeNone`。
+
+## 相关链接
+
+- [CHANGELOG.md](CHANGELOG.md)
+- [Windows 虚拟串口与调试](https://www.petershi.net/archives/2885)
+- [最初参考的文章](http://blog.csdn.net/wuyazhe/article/details/5598945)
+- [MIT 许可证](LICENSE)
