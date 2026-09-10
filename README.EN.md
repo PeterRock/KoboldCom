@@ -167,10 +167,6 @@ The WinForms sample runs the text protocol `^&…$$` and the hex protocol `AA BB
 
 [Windows virtual serial ports and debugging](https://www.petershi.net/archives/2885)
 
-## TODO
-
-- i18n
-
 ## Thanks
 
 The idea started from [this article](http://blog.csdn.net/wuyazhe/article/details/5598945).

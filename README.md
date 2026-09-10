@@ -167,10 +167,6 @@ WinForms 示例同时跑文本协议 `^&…$$` 和十六进制 `AA BB CC …`，
 
 [Windows 虚拟串口与调试](https://www.petershi.net/archives/2885)
 
-## 待办
-
-- i18n
-
 ## 致谢
 
 动手做这个库的灵感来自[这篇文章](http://blog.csdn.net/wuyazhe/article/details/5598945)。
