@@ -4,14 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <OutputPath>../../obj/verify/</OutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\KoboldCom\TextProtocolAnalyzer.cs" />
-    <Compile Include="..\..\KoboldCom\ProtocolAnalyzer.cs" />
-    <Compile Include="..\..\KoboldCom\CheckSumHandler.cs" />
-    <Compile Include="..\..\KoboldCom\SearchResult.cs" />
-    <Compile Include="..\..\KoboldCom\IAnalyzer.cs" />
+    <ProjectReference Include="..\..\KoboldCom\KoboldCom.csproj" />
   </ItemGroup>
 </Project>

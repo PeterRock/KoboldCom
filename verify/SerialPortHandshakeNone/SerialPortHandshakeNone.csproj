@@ -4,15 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <OutputPath>../../obj/verify-serial/</OutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
-    <Compile Include="..\..\KoboldCom\SerialPort.cs" />
-    <Compile Include="..\..\KoboldCom\SerialPortSetting.cs" />
-    <Compile Include="..\..\KoboldCom\ICommunication.cs" />
-    <Compile Include="..\..\KoboldCom\ICommunicationSetting.cs" />
-    <Compile Include="..\..\KoboldCom\DataReceivedHandler.cs" />
+    <ProjectReference Include="..\..\KoboldCom\KoboldCom.csproj" />
   </ItemGroup>
 </Project>

@@ -8,6 +8,30 @@
 
 类库提供了常见的16进制字节流协议`(HexProtocolAnalyzer)`和文本字节串协议`(TextProtocolAnalyzer)`的解析，所以可以使用KoboldCom，快速实现指定协议的数据收发
 
+### 版本说明
+
+这是一次有意的主版本中断：
+
+| 版本线 | 目标框架 | 说明 |
+| --- | --- | --- |
+| **1.x** | .NET Framework 3.5 | 标签 **`v1.1.0`** 是规划 2.0 时的 Framework 快照（含 PR #4 CheckData）。其后合并的 PR #5（十六进制双字节校验 / Handshake.None RTS/DTR）仍在 Framework 上，见分支 **`netfx-1.x`**。仍在 Framework 上的项目请使用该标签或分支，不要升级到 2.x。 |
+| **2.x**（当前主线） | `net8.0` + NuGet `System.IO.Ports` | SDK 风格工程，并包含 PR #4 / #5 的协议与串口行为。2.x 程序集无法被 .NET Framework 3.5 项目引用。程序集版本 **2.0.0**。 |
+
+公开 C# API 与中文 XML 文档尽量保持不变。本现代化不改写协议逻辑。
+
+### 构建
+
+需要 [.NET 8 SDK](https://dotnet.microsoft.com/download)。
+
+```
+dotnet build KoboldCom.sln
+dotnet run --project verify/TextProtocolAnalyzerCheckData
+dotnet run --project verify/HexProtocolAnalyzerCheckLength
+dotnet run --project verify/SerialPortHandshakeNone
+```
+
+Demo 为 `net8.0-windows` WinForms 项目，请在 Windows 上运行。非 Windows 环境可以交叉编译（工程已开启 `EnableWindowsTargeting`），但不能运行该界面程序。
+
 ### Wiki How
 
 常见的通讯协议一般是这样的：头+数据长度+数据正文+校验
@@ -43,13 +67,7 @@ CheckData16 = Crc16Modbus; // 或 SumCheck16；返回 16 位主机数值
 // 高字节在前时：CheckBigEndian = true;
 ```
 
-未设置 `CheckData16` 时，会把原来的单字节 `CheckData` 结果当作 16 位值比较。无硬件校验可运行：
-
-```
-dotnet run --project verify/TextProtocolAnalyzerCheckData
-dotnet run --project verify/HexProtocolAnalyzerCheckLength
-dotnet run --project verify/SerialPortHandshakeNone
-```
+未设置 `CheckData16` 时，会把原来的单字节 `CheckData` 结果当作 16 位值比较。
 
 ### 串口 RTS / DTR
 
