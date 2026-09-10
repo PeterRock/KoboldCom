@@ -22,6 +22,8 @@ namespace KoboldCom
             this.Parity = Parity.None;
             this.Handshake = Handshake.None;
             this.NewLine = "\r\n";
+            this.RtsEnable = true;
+            this.DtrEnable = true;
         }
 
         /// <summary>
@@ -63,6 +65,18 @@ namespace KoboldCom
         /// 握手协议
         /// </summary>
         public Handshake Handshake;
+
+        /// <summary>
+        /// Handshake 为 None 时是否拉高 RTS。默认 true，避免无硬件握手设备在 Write 后收不到应答。
+        /// Handshake 不为 None 时由系统握手逻辑控制 RTS，本属性不生效。
+        /// </summary>
+        public bool RtsEnable;
+
+        /// <summary>
+        /// Handshake 为 None 时是否拉高 DTR。默认 true。
+        /// Handshake 不为 None 时由系统握手逻辑控制 DTR，本属性不生效。
+        /// </summary>
+        public bool DtrEnable;
 
         /// <summary>
         /// 新行标识

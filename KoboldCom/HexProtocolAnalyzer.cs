@@ -13,7 +13,12 @@ namespace KoboldCom
         /// 数据校验，默认使用异或校验
         /// </summary>
         protected CheckDataHandler CheckData;
+        /// <summary>
+        /// 双字节校验。CheckLength 为 2 时优先使用；未设置则把 CheckData 的单字节结果按 16 位值比较。
+        /// </summary>
+        protected CheckData16Handler CheckData16;
         private int _stickLength;//定长数据-数据中不含数据长度的情况
+        private int _checkLength;
 
         /// <summary>
         /// 构造函数 Protected
@@ -24,6 +29,7 @@ namespace KoboldCom
             CheckData = new CheckDataHandler(HexProtocolAnalyzer<T>.XorCheck);
             _stickLength = 0;//置为0：默认非定长数据
             LenLength = 1;
+            CheckLength = 1;
         }
 
         /// <summary>
@@ -83,14 +89,14 @@ namespace KoboldCom
                     }
 
                     // 判断Buff中的数据是否够一个数据包, 如果不够：返回数据头标志，等待buff继续缓存新数据
-                    if (buffer.Count - index - (Mask.Length + LenLength) - 1 < dataLength)//-1是减去校验位
+                    if (buffer.Count - index - (Mask.Length + LenLength) - CheckLength < dataLength)
                     {
                         return SearchResult.Mask;
                     }
+                    int dataIndex = (index + Mask.Length) + LenLength;
+                    int checkIndex = index + (Mask.Length + dataLength) + LenLength;
                     //-数据校验
-                    if ((CheckData != null) && //--存在校验方法
-                        (CheckData(buffer, (index + Mask.Length) + LenLength, dataLength) //--数据长度
-                         != buffer[index + (Mask.Length + dataLength) + LenLength]))
+                    if (!ChecksumMatches(buffer, dataIndex, dataLength, checkIndex))
                     {
                         Console.WriteLine(index + "-" + buffer.Count + "-" + maskIndex);
                         // 对于校验不符合要求的数据，继续向后搜寻。(数据头是协议中定义出来的特异标志肯定不会出现在数据中)
@@ -99,7 +105,7 @@ namespace KoboldCom
                     }
                     else
                     {
-                        int count = ((Mask.Length + 1) + dataLength) + LenLength;//数据包总长度
+                        int count = ((Mask.Length + CheckLength) + dataLength) + LenLength;//数据包总长度
                         //拷贝数据包到Raw，然后以该数据包为分界点，清除buffer中匹配过的数据
                         Raw = new byte[count];
                         Console.WriteLine(index + "~~" + count);
@@ -142,6 +148,78 @@ namespace KoboldCom
         }
 
         /// <summary>
+        /// 16 位累加和（取低 16 位）。配合 CheckLength = 2 使用。
+        /// </summary>
+        public static int SumCheck16(List<byte> buf, int index, int len)
+        {
+            int num = 0;
+            for (int i = index; i < (index + len); i++)
+            {
+                num = (num + buf[i]) & 0xFFFF;
+            }
+            return num;
+        }
+
+        /// <summary>
+        /// Modbus CRC-16（多项式 0xA001，初值 0xFFFF）。默认按小端与帧尾两字节比较。
+        /// </summary>
+        public static int Crc16Modbus(List<byte> buf, int index, int len)
+        {
+            int crc = 0xFFFF;
+            for (int i = index; i < (index + len); i++)
+            {
+                crc ^= buf[i];
+                for (int n = 0; n < 8; n++)
+                {
+                    if ((crc & 1) != 0)
+                    {
+                        crc = (crc >> 1) ^ 0xA001;
+                    }
+                    else
+                    {
+                        crc >>= 1;
+                    }
+                }
+            }
+            return crc & 0xFFFF;
+        }
+
+        private bool ChecksumMatches(List<byte> buffer, int dataIndex, int dataLength, int checkIndex)
+        {
+            if (CheckLength <= 0)
+            {
+                return true;
+            }
+            if (CheckLength == 1)
+            {
+                if (CheckData == null)
+                {
+                    return true;
+                }
+                return CheckData(buffer, dataIndex, dataLength) == buffer[checkIndex];
+            }
+
+            int computed;
+            if (CheckData16 != null)
+            {
+                computed = CheckData16(buffer, dataIndex, dataLength) & 0xFFFF;
+            }
+            else if (CheckData != null)
+            {
+                computed = CheckData(buffer, dataIndex, dataLength);
+            }
+            else
+            {
+                return true;
+            }
+
+            int expected = CheckBigEndian
+                ? ((buffer[checkIndex] << 8) | buffer[checkIndex + 1])
+                : (buffer[checkIndex] | (buffer[checkIndex + 1] << 8));
+            return computed == expected;
+        }
+
+        /// <summary>
         /// 定长数据长度-默认不含数据校验位
         /// </summary>
         public int StaticLength
@@ -154,6 +232,37 @@ namespace KoboldCom
         /// 数据长度值是几个字节的数据
         /// </summary>
         protected int LenLength { get; set; }
+
+        /// <summary>
+        /// 帧尾校验字节数。默认 1，保持现有单字节 XOR/SUM 协议兼容。
+        /// 设为 2 时按二进制双字节比较：默认小端（低字节在前，与 Modbus CRC-16 一致）；
+        /// 高字节在前的协议请设置 CheckBigEndian = true。
+        /// 小于等于 0 表示帧中不含校验段、也不做校验。其他正数按 2 处理。
+        /// </summary>
+        public int CheckLength
+        {
+            get { return _checkLength; }
+            set
+            {
+                if (value == 1)
+                {
+                    _checkLength = 1;
+                }
+                else if (value <= 0)
+                {
+                    _checkLength = 0;
+                }
+                else
+                {
+                    _checkLength = 2;
+                }
+            }
+        }
+
+        /// <summary>
+        /// CheckLength 为 2 时，帧尾两字节是否按大端（高字节在前）解释。默认 false（小端）。
+        /// </summary>
+        public bool CheckBigEndian { get; set; }
 
         /// <summary>
         /// 数据头

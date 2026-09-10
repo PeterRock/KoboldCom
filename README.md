@@ -2,6 +2,8 @@
 
 `KoboldCom`是一个串口通信类库，提供自定义多协议异步解析、数据模型转换等功能。
 
+这里的「异步」指 `SerialPort.DataReceived` 事件驱动的收包与解析流水线，不是 C# 的 `async`/`await`。
+
 封装最复杂的数据流异步收发，以及根据协议把接收的数据进行模型映射转换等功能。
 
 类库提供了常见的16进制字节流协议`(HexProtocolAnalyzer)`和文本字节串协议`(TextProtocolAnalyzer)`的解析，所以可以使用KoboldCom，快速实现指定协议的数据收发
@@ -32,7 +34,26 @@ CheckData = XorCheck; // 默认读取 * 后 2 位十六进制，与 $ 和 * 之�
 校验失败的完整帧不会当作有效数据包，并从缓冲区丢弃；若其后还有合法帧，会继续匹配。
 `CheckLength` 默认为 2（十六进制 ASCII）；设为 1 时按 `EndOfLine` 后的单字节二进制校验比较。
 
-无硬件校验可运行：`dotnet run --project verify/TextProtocolAnalyzerCheckData`
+十六进制协议默认仍是帧尾 **1 字节**校验（`XorCheck`），现有协议无需改动。双字节校验时在子类构造函数中设置：
+
+```
+CheckLength = 2;
+CheckData16 = Crc16Modbus; // 或 SumCheck16；返回 16 位主机数值
+// 默认按小端（低字节在前）与帧尾两字节比较，与 Modbus CRC-16 一致
+// 高字节在前时：CheckBigEndian = true;
+```
+
+未设置 `CheckData16` 时，会把原来的单字节 `CheckData` 结果当作 16 位值比较。无硬件校验可运行：
+
+```
+dotnet run --project verify/TextProtocolAnalyzerCheckData
+dotnet run --project verify/HexProtocolAnalyzerCheckLength
+dotnet run --project verify/SerialPortHandshakeNone
+```
+
+### 串口 RTS / DTR
+
+`Handshake.None` 时，系统不会自动驱动 RTS/DTR。`SerialPortSetting` 默认 `RtsEnable = true`、`DtrEnable = true`，在 `Open` / 应用 `Setting` 时写入端口，避免部分设备只能被动收数、`Write` 后无应答。需要关闭时把对应标志设为 `false`。`Handshake` 不为 `None` 时仍由系统握手逻辑控制，不会改写这两根线。
 
 ### Demo
 ![运行截图](/docs/Screen01.png)

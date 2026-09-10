@@ -328,3 +328,7 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+
+# Local agent plans/specs (do not commit)
+.cursor/plans/
+.cursor/specs/
