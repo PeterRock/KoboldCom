@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build
+        run: dotnet build KoboldCom.sln
+
+      - name: Run hardware-free verifies
+        run: |
+          dotnet run --project verify/TextProtocolAnalyzerCheckData --no-build
+          dotnet run --project verify/HexProtocolAnalyzerCheckLength --no-build
+          dotnet run --project verify/SerialPortHandshakeNone --no-build
+
+  build-demo:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build Demo
+        run: dotnet build Demo/Demo.csproj
